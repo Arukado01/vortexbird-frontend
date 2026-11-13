@@ -41,6 +41,16 @@ Cliente OIDC público mediante Authorization Code + PKCE S256. Valida `state` de
 
 El adaptador `keycloak-js` no estaba disponible en el entorno desconectado; se implementó un cliente de alcance reducido en `services/oidc.ts` con pruebas de state, issuer y carrera logout/refresh. Requiere validar el flujo completo con el Keycloak desplegado antes de producción. Registro se delega al formulario de Keycloak; el enlace de cambio de contraseña usa `kc_action=UPDATE_PASSWORD`, y la recuperación sin credenciales se realiza con «Forgot password» en el formulario de Keycloak, sujeto a SMTP configurado. La rotación de claves y revocación efectiva de tokens son responsabilidades de Keycloak/API.
 
+## Checkout de pruebas opcional
+
+El detalle de la orden permite consultar `GET /payments/orders/{orderId}/checkout`. La plataforma mantiene el simulador como modo predeterminado; el frontend no activa un proveedor externo. Cuando el backend devuelve `mercadopago-sandbox`, un checkout pendiente y vigente puede abrirse por acción explícita en una nueva pestaña. El navegador acepta solo los destinos HTTPS exactos permitidos también por el backend; no acepta credenciales en la URL ni puertos alternativos.
+
+La vuelta del navegador y parámetros como `status=approved` nunca actualizan el estado del pago. La interfaz consulta el estado de la API cada cinco segundos mientras la operación está pendiente, vuelve a consultarlo al recuperar el foco y permite solicitar reconciliación al proveedor únicamente a quien tiene `payments.manage`. Una respuesta `202` significa verificación solicitada, no pago aprobado. Los estados inciertos, reembolsos pendientes, enlaces vencidos y errores se muestran de forma explícita. Las pruebas cubren destinos maliciosos, expiración y retorno del navegador falsamente aprobado.
+
+## Accesibilidad y carga
+
+Las rutas y el formulario de acceso cargan sus módulos bajo demanda. El layout permanece visible durante la carga de una vista. La compilación verificada después de esta división no presenta chunks mayores de 500 kB. El drawer móvil retiene el foco, se cierra con Escape, devuelve el foco al control que lo abrió y vuelve inerte el contenido exterior; cuando está oculto no deja enlaces accesibles por Tab. El buscador admite `/`, los errores de acceso se vinculan a sus campos, los diálogos tienen nombre y descripción accesibles y las tablas marcan encabezados de columna. Se ajustaron contrastes de texto secundario y estados en el tema claro. Esto no sustituye una auditoría completa con lector de pantalla o navegador real.
+
 ## Funciones
 
 Dashboard de métricas persistidas; listados paginados; partners/canales/productos/usuarios; roles dinámicos y matriz de permisos; asignación de roles; creación y detalle de órdenes con clave de idempotencia estable ante reintento; cancelación; stock/precios; pagos simulados; integraciones y fallos controlados; eventos y DLQ; suscripciones webhook con secreto mostrado una vez; auditoría; exportación limitada a la página/serie seleccionada; tema y navegación por teclado.

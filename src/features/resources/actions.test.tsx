@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ReactNode } from 'react';
 import { ResourcePage } from './ResourcePage';
 import { RolesPage } from '../roles/RolesPage';
+import { PaymentCheckoutDialog } from '../payments/PaymentCheckoutDialog';
 
 const { get, post, put, remove } = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn(), put: vi.fn(), remove: vi.fn() }));
 vi.mock('../../services/api', () => ({ api: { get, post, put, delete: remove }, apiError: (error: unknown) => ({ message: String(error) }) }));
@@ -19,6 +20,21 @@ beforeEach(() => {
 });
 
 describe('Confirmed operational mutations', () => {
+  it('never accepts an approved browser return as payment confirmation', async () => {
+    history.replaceState(null, '', '/payments?status=approved&collection_status=approved');
+    get.mockResolvedValue({ data: { orderId: 'order-1', provider: 'mercadopago-sandbox', status: 'pending', paymentStatus: 'pending', checkoutUrl: 'https://sandbox.mercadopago.com/checkout/v1/redirect?pref_id=test', expiresAt: null, canRetry: false } });
+    post.mockResolvedValue({ status: 202, data: {} });
+    mount(<PaymentCheckoutDialog orderId="order-1" onClose={() => {}} />);
+    await screen.findByRole('link', { name: /Abrir checkout de pruebas/ });
+    expect(screen.queryByText('Aprobado', { exact: true })).toBeNull();
+    expect(screen.getByText('Pendiente', { exact: true })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Verificar con proveedor' }));
+    await waitFor(() => expect(post).toHaveBeenCalledWith('/payments/orders/order-1/reconcile'));
+    await screen.findByText('Verificación solicitada. El estado solo cambia cuando el backend confirma el resultado con el proveedor.');
+    expect(screen.getByText('Pendiente', { exact: true })).toBeTruthy();
+    expect(screen.queryByText('Aprobado', { exact: true })).toBeNull();
+    history.replaceState(null, '', '/');
+  });
   it('requires confirmation and never offers manual approval for non-simulator payments', async () => {
     get.mockResolvedValue(page([{ id: 'sim-1', orderId: 'order-1', status: 'pending', provider: 'simulator', amount: 12000 }, { id: 'external-1', orderId: 'order-2', status: 'pending', provider: 'mercadopago', amount: 15000 }]));
     mount(<ResourcePage resource="payments" />);
@@ -52,4 +68,3 @@ describe('Confirmed operational mutations', () => {
     expect(screen.queryByRole('textbox')).toBeNull();
   });
 });
-

@@ -72,4 +72,3 @@ export function RolesPage() {
     {users && <Modal title={`Usuarios con rol ${text(users.name)}`} onClose={() => setUsers(null)}>{roleUsers.isPending ? <Skeleton /> : roleUsers.error ? <ErrorState error={roleUsers.error} retry={() => void roleUsers.refetch()} /> : <>{roleUsers.data?.items.length ? <div className="role-users">{roleUsers.data.items.map(user => <div key={text(user.id)}><Users size={17} /><strong>{text(user.displayName)}</strong><span>{text(user.email)}</span></div>)}</div> : <Empty title="No hay usuarios asociados" />}{roleUsers.data && <Pagination page={roleUsers.data} onChange={setUsersPage} />}</>}</Modal>}
   </>;
 }
-
