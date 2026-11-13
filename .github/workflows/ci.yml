@@ -1,0 +1,66 @@
+name: Frontend quality
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - run: npm audit --omit=dev --audit-level=high
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+  image:
+    if: github.ref == 'refs/heads/main' && vars.AWS_DEPLOY_ROLE_ARN != ''
+    needs: verify
+    environment: staging
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION || 'us-east-2' }}
+      - uses: aws-actions/amazon-ecr-login@v2
+        id: ecr
+      - run: |
+          docker build -t "$REGISTRY/$REPOSITORY:$GITHUB_SHA" .
+          docker push "$REGISTRY/$REPOSITORY:$GITHUB_SHA"
+        env:
+          REGISTRY: ${{ steps.ecr.outputs.registry }}
+          REPOSITORY: ${{ vars.ECR_REPOSITORY }}
+      - name: Deploy approved cluster revision
+        if: vars.EKS_CLUSTER_NAME != ''
+        run: |
+          aws eks update-kubeconfig --name "$CLUSTER"
+          kubectl -n vortexbird set image deployment/frontend frontend="$REGISTRY/$REPOSITORY:$GITHUB_SHA"
+          kubectl -n vortexbird rollout status deployment/frontend --timeout=180s || { kubectl -n vortexbird rollout undo deployment/frontend; exit 1; }
+        env:
+          CLUSTER: ${{ vars.EKS_CLUSTER_NAME }}
+          REGISTRY: ${{ steps.ecr.outputs.registry }}
+          REPOSITORY: ${{ vars.ECR_REPOSITORY }}
+      - name: Smoke test
+        if: vars.FRONTEND_URL != ''
+        run: curl --fail --retry 3 "$FRONTEND_URL/health"
+        env:
+          FRONTEND_URL: ${{ vars.FRONTEND_URL }}

@@ -1,0 +1,9 @@
+export const money = (value: unknown, currency = 'COP') => value === null || value === undefined ? '—' : new Intl.NumberFormat('es-CO', { style: 'currency', currency, maximumFractionDigits: 0 }).format(Number(value));
+export const number = (value: unknown) => value === null || value === undefined ? '—' : new Intl.NumberFormat('es-CO').format(Number(value));
+export const date = (value: unknown) => value && !Number.isNaN(Date.parse(String(value))) ? new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(String(value))) : '—';
+export const text = (value: unknown): string => value === null || value === undefined || value === '' ? '—' : typeof value === 'boolean' ? (value ? 'Sí' : 'No') : typeof value === 'object' ? JSON.stringify(value) : String(value);
+export const shortId = (value: unknown) => value ? String(value).slice(0, 8).toUpperCase() : '—';
+export const statuses: Record<string, string> = { confirmed: 'Confirmada', pending: 'Pendiente', cancelled: 'Cancelada', rejected: 'Rechazado', approved: 'Aprobado', processing: 'Procesando', completed: 'Completado', healthy: 'Disponible', unhealthy: 'Con errores', active: 'Activo', inactive: 'Inactivo', failed: 'Fallido', delivered: 'Entregado', published: 'Publicado', deadletter: 'En DLQ', pendingpayment: 'Pago pendiente', compensated: 'Compensada', shipped: 'Despachada' };
+Object.assign(statuses, { true: 'Activo', false: 'Inactivo', dead_letter: 'En DLQ', awaiting_payment: 'Pago pendiente', reserved: 'Reservada', compensating: 'Compensando', success: 'Exitoso', unknown: 'Sin verificar', processed: 'Procesado' });
+export const statusLabel = (value: unknown) => statuses[String(value).toLowerCase()] ?? text(value);
+export const safeCsvCell = (value: unknown) => { const v = text(value); return '"' + (/^[=+\-@\t\r]/.test(v) ? "'" + v : v).replaceAll('"', '""') + '"'; };

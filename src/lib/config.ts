@@ -1,0 +1,2 @@
+const setting = (name: string, fallback: string) => window.__VORTEX_CONFIG__?.[name] ?? import.meta.env[name] ?? fallback;
+export const config = { apiUrl: setting('VITE_API_BASE_URL', '/api/v1'), keycloakUrl: setting('VITE_KEYCLOAK_URL', 'http://localhost:8080'), realm: setting('VITE_KEYCLOAK_REALM', 'vortexbird'), clientId: setting('VITE_KEYCLOAK_CLIENT_ID', 'vortexbird-portal'), demoAuth: setting('VITE_DEMO_AUTH', 'false') === 'true' };
