@@ -37,7 +37,9 @@ TanStack Query administra la caché y sus invalidaciones; el servidor pagina, fi
 
 ## Identidad
 
-Cliente OIDC público mediante Authorization Code + PKCE S256. Valida `state` de un solo uso y máximo 10 minutos, issuer exacto y origen de endpoints. Access y refresh token permanecen en memoria. `sessionStorage` guarda únicamente state y code verifier durante el redireccionamiento. La identidad y permisos provienen de `/auth/me` tras validación JWT del backend; no se confía en un ID token decodificado por el navegador. Refresh serializado con protección frente a respuestas que lleguen después del logout. Recargar completamente la página requiere iniciar sesión nuevamente (Keycloak puede conservar su sesión SSO).
+Cliente OIDC público mediante Authorization Code + PKCE S256. Valida `state` de un solo uso y máximo 10 minutos, issuer exacto y origen de endpoints. En OIDC, access y refresh token permanecen en memoria y la recarga completa requiere renovar el acceso con el proveedor. `sessionStorage` guarda state y code verifier durante el redireccionamiento. El backend valida el JWT y devuelve la identidad y permisos en `/auth/me`. El refresh serializado descarta respuestas posteriores al cierre de sesión.
+
+El modo demo guarda su token de diez minutos en `sessionStorage`. Al recargar la misma pestaña, el portal comprueba la sesión en `/auth/me`. El cierre de sesión y la caducidad limpian el token.
 
 El adaptador `keycloak-js` no estaba disponible en el entorno desconectado; se implementó un cliente de alcance reducido en `services/oidc.ts` con pruebas de state, issuer y carrera logout/refresh. Requiere validar el flujo completo con el Keycloak desplegado antes de producción. Registro se delega al formulario de Keycloak; el enlace de cambio de contraseña usa `kc_action=UPDATE_PASSWORD`, y la recuperación sin credenciales se realiza con «Forgot password» en el formulario de Keycloak, sujeto a SMTP configurado. La rotación de claves y revocación efectiva de tokens son responsabilidades de Keycloak/API.
 

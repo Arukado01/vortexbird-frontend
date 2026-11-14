@@ -1,10 +1,11 @@
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Activity, ArrowUpRight, Bell, Boxes, Cable, ChartNoAxesCombined, ChevronDown, ChevronLeft, ChevronRight, CircleDollarSign, CreditCard, FileChartColumn, Globe, LayoutDashboard, LogOut, Menu, Moon, Network, Package, Search, Settings2, ShieldCheck, ShoppingBag, Sun, Users, Webhook, X, Zap } from 'lucide-react';
+import { Activity, ArrowUpRight, Bell, Boxes, Cable, ChartNoAxesCombined, ChevronDown, ChevronLeft, ChevronRight, CircleDollarSign, CreditCard, FileChartColumn, Globe, LayoutDashboard, LogOut, Menu, Network, Package, Search, Settings2, ShieldCheck, ShoppingBag, Users, Webhook, X, Zap } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useAuth } from '../features/auth/AuthProvider';
 import { config } from '../lib/config';
 import { Button, Skeleton, useToast } from '../components/ui';
+import { ThemeToggle } from '../components/ThemeToggle';
 const groups: Array<{ title: string; items: Array<{ path: string; title: string; icon: LucideIcon; permission: string }> }> = [
   { title: 'VISTA GENERAL', items: [{ path: '/', title: 'Dashboard', icon: LayoutDashboard, permission: 'dashboard.read' }, { path: '/integrations', title: 'Integraciones', icon: Cable, permission: 'integrations.read' }, { path: '/events', title: 'Eventos', icon: Zap, permission: 'events.read' }, { path: '/webhooks', title: 'Webhooks', icon: Webhook, permission: 'webhooks.read' }] },
   { title: 'OPERACIÓN', items: [{ path: '/orders', title: 'Órdenes', icon: ShoppingBag, permission: 'orders.read' }, { path: '/inventory', title: 'Inventario', icon: Boxes, permission: 'inventory.read' }, { path: '/pricing', title: 'Precios', icon: CircleDollarSign, permission: 'pricing.read' }, { path: '/products', title: 'Productos', icon: Package, permission: 'products.read' }, { path: '/payments', title: 'Pagos', icon: CreditCard, permission: 'payments.read' }] },
@@ -15,10 +16,8 @@ export function Layout() {
   const [collapsed, setCollapsed] = useState(false); const [mobile, setMobile] = useState(false);
   const [smallViewport, setSmallViewport] = useState(() => matchMedia('(max-width: 760px)').matches);
   const [search, setSearch] = useState('');
-  const [theme, setTheme] = useState(() => localStorage.getItem('vortex-theme') ?? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
   const sidebar = useRef<HTMLElement>(null); const searchInput = useRef<HTMLInputElement>(null); const main = useRef<HTMLElement>(null);
   const location = useLocation(); const navigate = useNavigate();
-  useEffect(() => { document.documentElement.dataset.theme = theme; localStorage.setItem('vortex-theme', theme); }, [theme]);
   useEffect(() => { const media = matchMedia('(max-width: 760px)'); const update = () => { setSmallViewport(media.matches); if (!media.matches) setMobile(false); }; media.addEventListener('change', update); return () => media.removeEventListener('change', update); }, []);
   useEffect(() => { setMobile(false); setSearch(''); const frame = requestAnimationFrame(() => main.current?.focus({ preventScroll: true })); return () => cancelAnimationFrame(frame); }, [location.pathname]);
   useEffect(() => {
@@ -59,7 +58,7 @@ export function Layout() {
     <div className="main-shell" inert={mobile}>
       <header className="topbar"><div className="breadcrumbs"><Button variant="ghost" className="mobile-menu" aria-label="Abrir menú" aria-expanded={mobile} aria-controls="workspace-navigation" onClick={() => setMobile(true)}><Menu size={20} /></Button><span>Workspace</span><ChevronRight size={13} /><strong>{current}</strong></div>
         <div className="topbar-actions"><div className="global-search"><Search size={16} /><input ref={searchInput} aria-label="Buscar módulo" aria-keyshortcuts="/" placeholder="Buscar en el workspace…" value={search} onChange={event => setSearch(event.target.value)} /><kbd aria-hidden="true">/</kbd>{search.trim() && <div className="search-results" role="region" aria-label="Resultados de búsqueda de módulos">{matches.length ? matches.map(item => <button key={item.path} onClick={() => { navigate(item.path); setSearch(''); }}><item.icon size={16} />{item.title}<ArrowUpRight size={13} /></button>) : <p role="status">No hay módulos coincidentes.</p>}</div>}</div>
-          <Button variant="ghost" aria-label={theme === 'dark' ? 'Activar tema claro' : 'Activar tema oscuro'} onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>{theme === 'dark' ? <Sun size={19} /> : <Moon size={19} />}</Button>
+          <ThemeToggle />
           <Button variant="ghost" aria-label="Ver actividad reciente" onClick={() => navigate('/activity-logs')}><Bell size={19} /></Button><div className="header-divider" />
           <details className="profile-menu"><summary aria-label="Menú de sesión"><span className="avatar">{auth.session?.user.displayName?.slice(0, 2).toUpperCase() ?? 'AR'}</span><ChevronDown size={13} /></summary><div><strong>{auth.session?.user.displayName}</strong><small>{auth.session?.user.email}</small>{!config.demoAuth && <button onClick={() => void sessionAction(auth.changePassword)}><ShieldCheck size={15} />Administrar cuenta</button>}<button onClick={() => void sessionAction(auth.logout)}><LogOut size={15} />Cerrar sesión</button></div></details>
         </div>

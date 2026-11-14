@@ -7,6 +7,7 @@ import { useAuth } from './AuthProvider';
 import { config } from '../../lib/config';
 import { apiError } from '../../services/api';
 import { Button } from '../../components/ui';
+import { ThemeToggle } from '../../components/ThemeToggle';
 
 const schema = z.object({ email: z.email('Introduce un correo válido.'), password: z.string().min(1, 'Introduce la contraseña.') });
 
@@ -22,7 +23,11 @@ export function LoginPage() {
       <p className="login-footer">VortexBird Integration Platform · Assessment de arquitectura</p>
     </section>
     <main className="login-panel"><div className="login-form">
-      <span className="login-shield"><LockKeyhole size={26} /></span><p className="eyebrow">BIENVENIDO A TU WORKSPACE</p><h1>Todo empieza conectado.</h1><p className="subtitle">Accede al centro de operaciones de AndesRetail.</p>
+      <div className="login-form-tools">
+        <span className="login-shield"><LockKeyhole size={26} /></span>
+        <ThemeToggle />
+      </div>
+      <p className="eyebrow">BIENVENIDO A TU WORKSPACE</p><h1>Todo empieza conectado.</h1><p className="subtitle">Accede al centro de operaciones de AndesRetail.</p>
       {config.demoAuth ? <form onSubmit={handleSubmit(login)} noValidate aria-busy={busy}>
         <div className="notice">Entorno de demostración · Autenticación local de desarrollo</div>
         <label htmlFor="login-email">Correo electrónico</label><input id="login-email" {...register('email')} autoComplete="username" type="email" aria-invalid={!!errors.email} aria-describedby={errors.email ? 'login-email-error' : undefined} />{errors.email && <small id="login-email-error" className="field-error" role="alert">{errors.email.message}</small>}
