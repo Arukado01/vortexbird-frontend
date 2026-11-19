@@ -1,0 +1,10 @@
+# Explicit exclusions for railway up (defense in depth; the CLI also honors .gitignore)
+node_modules/
+dist/
+test-results/
+playwright-report/
+.git/
+.github/cache/
+debug.log
+*.tsbuildinfo
+qa/
