@@ -1,0 +1,83 @@
+{
+  "id": "pagos",
+  "title": "Pagos y conciliación",
+  "module": "Pagos y conciliación",
+  "category": "Operación",
+  "summary": "Consulta referencias, estados de pago y verificación con el proveedor de pruebas.",
+  "audiences": [
+    "Administrador",
+    "Administrador de partners",
+    "Operador"
+  ],
+  "owner": "Equipo de producto y documentación de VortexBird",
+  "permissions": [
+    "payments.read"
+  ],
+  "keywords": [
+    "checkout",
+    "desconocido",
+    "reembolso",
+    "conciliacion"
+  ],
+  "sections": [
+    {
+      "id": "referencias",
+      "title": "Consultar pagos",
+      "steps": [
+        "En Pagos, revisa transacción, orden, importe, estado, proveedor y referencia.",
+        "Si también tienes acceso a Órdenes, abre su detalle y selecciona Pago y checkout para consultar el estado.",
+        "Los listados muestran 10 registros por página. Usa Página anterior y Página siguiente para recorrer los resultados; Exportar página descarga solo los registros de la página visible."
+      ],
+      "permission": "payments.read",
+      "route": "/payments"
+    },
+    {
+      "id": "conciliar",
+      "title": "Verificar con el proveedor",
+      "steps": [
+        "En Pago y checkout, usa Consultar estado para refrescar la vista. Si aparece Verificar con proveedor, solicítalo para contrastar el resultado con la cuenta de pruebas.",
+        "Si el pago está pendiente o en estado desconocido, espera la confirmación. Conserva la referencia comercial y evita iniciar otro intento para la misma orden."
+      ],
+      "permission": "payments.manage"
+    },
+    {
+      "id": "resolver-prueba",
+      "title": "Resolver un pago simulado",
+      "steps": [
+        "En un entorno de desarrollo con simulación habilitada, abre Pagos y ubica la transacción pendiente del proveedor simulator.",
+        "Si aparecen Aprobar o Rechazar, elige el resultado y pulsa Confirmar resultado de prueba. Consulta el detalle de la orden para seguir la confirmación o liberación de inventario."
+      ],
+      "permission": "payments.manage",
+      "route": "/payments"
+    }
+  ],
+  "faq": [
+    {
+      "question": "¿Qué significa Verificación pendiente?",
+      "answer": "El proveedor todavía no entregó evidencia suficiente. El sistema puede confirmar, rechazar o escalar a revisión tras la conciliación."
+    }
+  ],
+  "history": [
+    {
+      "version": "1.1.1",
+      "date": "2026-11-17",
+      "description": "Paginación de 10 registros por página, navegación y alcance de la exportación de página."
+    },
+    {
+      "version": "1.1.0",
+      "date": "2026-11-17",
+      "description": "Lectura, búsqueda e impresión sin iniciar sesión. Se indican los permisos necesarios para ejecutar las operaciones."
+    },
+    {
+      "version": "1.0.0",
+      "date": "2026-11-17",
+      "description": "Publicación de la guía en el centro de ayuda con los flujos disponibles en el portal."
+    }
+  ],
+  "flow": [
+    "Abrir la orden",
+    "Consultar el estado",
+    "Verificar la referencia"
+  ],
+  "visibility": "public"
+}

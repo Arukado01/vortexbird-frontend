@@ -1,0 +1,82 @@
+{
+  "id": "catalogo-inventario-precios",
+  "title": "Catálogo, inventario y precios",
+  "module": "Catálogo, inventario y precios",
+  "category": "Operación",
+  "summary": "Busca productos y revisa existencias, reservas y precios.",
+  "audiences": [
+    "Usuario estándar",
+    "Administrador",
+    "Administrador de partners",
+    "Operador"
+  ],
+  "owner": "Equipo de producto y documentación de VortexBird",
+  "permissions": [
+    "products.read",
+    "inventory.read",
+    "pricing.read"
+  ],
+  "keywords": [
+    "SKU",
+    "stock",
+    "existencias",
+    "disponibilidad",
+    "COP"
+  ],
+  "sections": [
+    {
+      "id": "productos",
+      "title": "Consultar productos",
+      "steps": [
+        "En Productos, busca por SKU o nombre. Revisa categoría y si el producto está activo.",
+        "Los listados muestran 10 registros por página. Usa Página anterior y Página siguiente para recorrer los resultados; Exportar página descarga solo los registros de la página visible."
+      ],
+      "permission": "products.read",
+      "route": "/products"
+    },
+    {
+      "id": "inventario",
+      "title": "Consultar stock y reservas",
+      "steps": [
+        "En Inventario, encuentra el SKU y la tienda. Compara existencias, reservadas y disponibles.",
+        "La reserva reduce la disponibilidad mientras se procesa la orden. Una orden rechazada o cancelada puede liberar la reserva según su estado."
+      ],
+      "permission": "inventory.read",
+      "route": "/inventory"
+    },
+    {
+      "id": "precios",
+      "title": "Consultar precios",
+      "steps": [
+        "En Precios, revisa SKU, canal, cliente, valor y moneda. Confirma el contexto antes de comparar valores.",
+        "Si la pantalla se actualizó hace tiempo o una orden rechaza precio o stock, vuelve a consultar. La creación de la orden revalida precio y reserva en el backend."
+      ],
+      "permission": "pricing.read",
+      "route": "/pricing"
+    }
+  ],
+  "faq": [
+    {
+      "question": "¿Qué hago si el stock visible cambió?",
+      "answer": "Vuelve a consultar el inventario y verifica el SKU y la tienda. Las operaciones de otros usuarios pueden modificar las cifras."
+    }
+  ],
+  "history": [
+    {
+      "version": "1.1.1",
+      "date": "2026-11-17",
+      "description": "Paginación de 10 registros por página, navegación y alcance de la exportación de página."
+    },
+    {
+      "version": "1.1.0",
+      "date": "2026-11-17",
+      "description": "Lectura, búsqueda e impresión sin iniciar sesión. Se indican los permisos necesarios para ejecutar las operaciones."
+    },
+    {
+      "version": "1.0.0",
+      "date": "2026-11-17",
+      "description": "Publicación de la guía en el centro de ayuda con los flujos disponibles en el portal."
+    }
+  ],
+  "visibility": "public"
+}

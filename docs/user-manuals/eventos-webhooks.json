@@ -1,0 +1,71 @@
+{
+  "id": "eventos-webhooks",
+  "title": "Eventos y webhooks",
+  "module": "Eventos y webhooks",
+  "category": "Integraciones",
+  "summary": "Consulta publicaciones, intentos y entregas de notificaciones.",
+  "audiences": [
+    "Administrador",
+    "Administrador de partners",
+    "Operador"
+  ],
+  "owner": "Equipo de producto y documentación de VortexBird",
+  "permissions": [
+    "events.read",
+    "webhooks.read"
+  ],
+  "keywords": [
+    "eventos",
+    "reintentos",
+    "dlq",
+    "mensajes fallidos",
+    "webhook"
+  ],
+  "sections": [
+    {
+      "id": "eventos",
+      "title": "Consultar eventos",
+      "steps": [
+        "Abre Eventos y revisa tipo, estado, intentos y correlación. Si un mensaje agotó intentos, registra su correlación y escala la revisión.",
+        "Los listados muestran 10 registros por página. Usa Página anterior y Página siguiente para recorrer los resultados; Exportar página descarga solo los registros de la página visible."
+      ],
+      "permission": "events.read",
+      "route": "/events"
+    },
+    {
+      "id": "entregas",
+      "title": "Consultar webhooks y entregas",
+      "steps": [
+        "En Webhooks, revisa la suscripción y su destino. Selecciona Historial de entregas para consultar estado, intentos, respuesta HTTP y último error.",
+        "Si el número de intentos aumenta, revisa la causa antes de modificar una suscripción."
+      ],
+      "permission": "webhooks.read",
+      "route": "/webhooks"
+    }
+  ],
+  "faq": [
+    {
+      "question": "¿Qué es la DLQ?",
+      "answer": "Es la cola que retiene mensajes de SQS tras agotar la política de reintentos. Su revisión y redrive corresponden a operaciones de infraestructura. La vista de Eventos muestra estados de la plataforma.",
+      "permission": "events.read"
+    }
+  ],
+  "history": [
+    {
+      "version": "1.1.1",
+      "date": "2026-11-17",
+      "description": "Paginación de 10 registros por página, navegación y alcance de la exportación de página."
+    },
+    {
+      "version": "1.1.0",
+      "date": "2026-11-17",
+      "description": "Lectura, búsqueda e impresión sin iniciar sesión. Se indican los permisos necesarios para ejecutar las operaciones."
+    },
+    {
+      "version": "1.0.0",
+      "date": "2026-11-17",
+      "description": "Publicación de la guía en el centro de ayuda con los flujos disponibles en el portal."
+    }
+  ],
+  "visibility": "public"
+}

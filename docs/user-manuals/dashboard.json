@@ -1,0 +1,75 @@
+{
+  "id": "dashboard",
+  "title": "Dashboard",
+  "module": "Dashboard",
+  "category": "Vista general",
+  "summary": "Consulta indicadores y entiende de dónde salen las cifras.",
+  "audiences": [
+    "Usuario estándar",
+    "Administrador",
+    "Administrador de partners",
+    "Operador"
+  ],
+  "owner": "Equipo de producto y documentación de VortexBird",
+  "permissions": [
+    "dashboard.read"
+  ],
+  "keywords": [
+    "métricas",
+    "gráficas",
+    "pedidos",
+    "ingresos"
+  ],
+  "sections": [
+    {
+      "id": "indicadores",
+      "title": "Leer los indicadores",
+      "steps": [
+        "Selecciona un período. Los totales de órdenes, pagos, inventario e integraciones reflejan los datos que el backend devuelve para tu perfil.",
+        "Consulta las gráficas para ver la evolución de órdenes y su distribución. Usa las listas de actividad y órdenes recientes para continuar la revisión."
+      ],
+      "permission": "dashboard.read",
+      "route": "/"
+    },
+    {
+      "id": "navegar",
+      "title": "Navegar desde el dashboard",
+      "steps": [
+        "Usa el menú lateral para abrir los módulos disponibles. En móvil abre el menú desde la barra superior.",
+        "Si el dashboard muestra un fallo de carga, usa la opción de reintento y conserva el identificador de correlación cuando aparezca."
+      ],
+      "permission": "dashboard.read",
+      "route": "/"
+    }
+  ],
+  "faq": [
+    {
+      "question": "¿Por qué algunas cifras aparecen sin valor?",
+      "answer": "Las métricas globales pueden estar limitadas a perfiles autorizados. Comprueba el período y tu alcance antes de comparar cifras."
+    }
+  ],
+  "history": [
+    {
+      "version": "1.1.1",
+      "date": "2026-11-17",
+      "description": "La gráfica de órdenes por canal permanece disponible en tablet y móvil; acceso a actividad con nombre accesible."
+    },
+    {
+      "version": "1.1.0",
+      "date": "2026-11-17",
+      "description": "Lectura, búsqueda e impresión sin iniciar sesión. Se indican los permisos necesarios para ejecutar las operaciones."
+    },
+    {
+      "version": "1.0.0",
+      "date": "2026-11-17",
+      "description": "Publicación de la guía en el centro de ayuda con los flujos disponibles en el portal."
+    }
+  ],
+  "illustration": {
+    "file": "dashboard.png",
+    "alt": "Dashboard con tarjetas de indicadores y selector de período",
+    "caption": "Dashboard con datos de prueba.",
+    "permission": "dashboard.read"
+  },
+  "visibility": "public"
+}

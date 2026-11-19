@@ -1,0 +1,54 @@
+{
+  "id": "reportes",
+  "title": "Reportes de órdenes",
+  "module": "Reportes de órdenes",
+  "category": "Vista general",
+  "summary": "Consulta agregados por período y exporta los resultados.",
+  "audiences": [
+    "Usuario estándar",
+    "Administrador",
+    "Administrador de partners",
+    "Operador"
+  ],
+  "owner": "Equipo de producto y documentación de VortexBird",
+  "permissions": [
+    "reports.read"
+  ],
+  "keywords": [
+    "csv",
+    "exportacion",
+    "valor acumulado",
+    "agregado"
+  ],
+  "sections": [
+    {
+      "id": "reporte",
+      "title": "Consultar y exportar",
+      "steps": [
+        "Abre Reportes y selecciona los últimos 7, 30 o 90 días.",
+        "Revisa las órdenes y el valor acumulado por fecha. Usa Exportar reporte si el período contiene datos."
+      ],
+      "permission": "reports.read",
+      "route": "/reports"
+    }
+  ],
+  "faq": [
+    {
+      "question": "¿Por qué no puedo exportar?",
+      "answer": "El botón está deshabilitado si el período seleccionado no tiene registros. Prueba otro período."
+    }
+  ],
+  "history": [
+    {
+      "version": "1.1.0",
+      "date": "2026-11-17",
+      "description": "Lectura, búsqueda e impresión sin iniciar sesión. Se indican los permisos necesarios para ejecutar las operaciones."
+    },
+    {
+      "version": "1.0.0",
+      "date": "2026-11-17",
+      "description": "Publicación de la guía en el centro de ayuda con los flujos disponibles en el portal."
+    }
+  ],
+  "visibility": "public"
+}

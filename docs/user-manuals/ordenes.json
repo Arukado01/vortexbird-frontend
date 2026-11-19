@@ -1,0 +1,88 @@
+{
+  "id": "ordenes",
+  "title": "Gestión de órdenes",
+  "module": "Gestión de órdenes",
+  "category": "Operación",
+  "summary": "Crea pedidos y sigue las reservas, estados y cambios de cada orden.",
+  "audiences": [
+    "Usuario estándar",
+    "Administrador",
+    "Administrador de partners",
+    "Operador"
+  ],
+  "owner": "Equipo de producto y documentación de VortexBird",
+  "permissions": [
+    "orders.read"
+  ],
+  "keywords": [
+    "crear orden",
+    "saga",
+    "timeline",
+    "idempotencia",
+    "pedido"
+  ],
+  "sections": [
+    {
+      "id": "consultar",
+      "title": "Consultar una orden",
+      "steps": [
+        "En Órdenes, filtra por estado o busca por ID o cliente. Abre el detalle de la orden.",
+        "Revisa el estado, el total, el estado de pago, los productos y el timeline. Usa Actualizar para consultar de nuevo.",
+        "Los listados muestran 10 registros por página. Usa Página anterior y Página siguiente para recorrer los resultados; Exportar página descarga solo los registros de la página visible."
+      ],
+      "permission": "orders.read",
+      "route": "/orders"
+    },
+    {
+      "id": "crear",
+      "title": "Crear una orden",
+      "steps": [
+        "Selecciona Crear orden y elige partner, canal, tienda y cliente. Agrega los productos y cantidades.",
+        "Si estás en desarrollo con pagos simulados, el formulario permite elegir un resultado de prueba. Envía la orden y abre su detalle para seguir el procesamiento.",
+        "Ante un fallo temporal, reintenta desde el mismo formulario. La clave de idempotencia se conserva mientras el formulario esté abierto."
+      ],
+      "permission": "orders.create",
+      "route": "/orders"
+    },
+    {
+      "id": "estados",
+      "title": "Interpretar estados y actuar",
+      "steps": [
+        "Reservada indica que el inventario se apartó. En espera de pago indica que queda una confirmación pendiente. Confirmada indica que el flujo aprobó el pago.",
+        "Usa Cancelar orden cuando tu perfil y el estado lo permitan. Para soporte, copia el identificador de correlación del detalle."
+      ],
+      "permission": "orders.read",
+      "route": "/orders"
+    }
+  ],
+  "faq": [
+    {
+      "question": "¿Por qué una orden recién creada sigue pendiente?",
+      "answer": "El pago y la confirmación avanzan de forma asíncrona. Revisa el timeline antes de iniciar una operación nueva."
+    }
+  ],
+  "history": [
+    {
+      "version": "1.1.1",
+      "date": "2026-11-17",
+      "description": "Paginación de 10 registros por página, navegación y alcance de la exportación de página."
+    },
+    {
+      "version": "1.1.0",
+      "date": "2026-11-17",
+      "description": "Lectura, búsqueda e impresión sin iniciar sesión. Se indican los permisos necesarios para ejecutar las operaciones."
+    },
+    {
+      "version": "1.0.0",
+      "date": "2026-11-17",
+      "description": "Publicación de la guía en el centro de ayuda con los flujos disponibles en el portal."
+    }
+  ],
+  "flow": [
+    "Validar el pedido",
+    "Reservar inventario",
+    "Esperar el pago",
+    "Confirmar o compensar"
+  ],
+  "visibility": "public"
+}

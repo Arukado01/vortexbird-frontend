@@ -1,0 +1,73 @@
+{
+  "id": "integraciones-configuracion",
+  "title": "Integraciones y configuración",
+  "module": "Integraciones y configuración",
+  "category": "Integraciones",
+  "summary": "Revisa adaptadores, ejecuciones y preferencias del workspace.",
+  "audiences": [
+    "Administrador",
+    "Operador"
+  ],
+  "owner": "Equipo de producto y documentación de VortexBird",
+  "permissions": [
+    "integrations.read",
+    "settings.read"
+  ],
+  "keywords": [
+    "adaptadores",
+    "ERP",
+    "WMS",
+    "OMS",
+    "CRM",
+    "latencia",
+    "configuracion"
+  ],
+  "sections": [
+    {
+      "id": "adaptadores",
+      "title": "Consultar adaptadores",
+      "steps": [
+        "Abre Integraciones y revisa estado, latencia y última actividad del adaptador.",
+        "Selecciona Historial de ejecuciones para revisar operación, duración, estado, error y correlación. Si tienes permisos de gestión globales, puedes cambiar el modo de fallo de los adaptadores simulados.",
+        "Abre Historial de ejecuciones para consultar páginas de 10 registros. Página anterior y Página siguiente recorren el historial; Exportar página descarga la página visible."
+      ],
+      "permission": "integrations.read",
+      "route": "/integrations"
+    },
+    {
+      "id": "preferencias",
+      "title": "Consultar y editar configuración",
+      "steps": [
+        "Abre Configuración para revisar las preferencias y el modo de identidad del workspace.",
+        "Si tu perfil puede editar, pulsa Guardar configuración después de validar los valores. Las conexiones externas se configuran desde el despliegue por el equipo responsable."
+      ],
+      "permission": "settings.read",
+      "route": "/settings"
+    }
+  ],
+  "faq": [
+    {
+      "question": "¿Qué indica un fallo de un adaptador simulado?",
+      "answer": "Una prueba configurada puede inducir timeout o indisponibilidad. Revisa el modo de simulación y contrasta la correlación con el historial.",
+      "permission": "integrations.read"
+    }
+  ],
+  "history": [
+    {
+      "version": "1.1.1",
+      "date": "2026-11-17",
+      "description": "Historial de ejecuciones con 10 registros por página y exportación de la página visible."
+    },
+    {
+      "version": "1.1.0",
+      "date": "2026-11-17",
+      "description": "Lectura, búsqueda e impresión sin iniciar sesión. Se indican los permisos necesarios para ejecutar las operaciones."
+    },
+    {
+      "version": "1.0.0",
+      "date": "2026-11-17",
+      "description": "Publicación de la guía en el centro de ayuda con los flujos disponibles en el portal."
+    }
+  ],
+  "visibility": "public"
+}

@@ -1,0 +1,69 @@
+{
+  "id": "partners-canales",
+  "title": "Partners y canales",
+  "module": "Partners y canales",
+  "category": "Administración",
+  "summary": "Administra organizaciones, canales y cuotas del workspace.",
+  "audiences": [
+    "Administrador",
+    "Administrador de partners"
+  ],
+  "owner": "Equipo de producto y documentación de VortexBird",
+  "permissions": [
+    "partners.read",
+    "channels.read"
+  ],
+  "keywords": [
+    "tienda",
+    "cuotas",
+    "límite",
+    "solicitudes"
+  ],
+  "sections": [
+    {
+      "id": "partners",
+      "title": "Administrar partners",
+      "steps": [
+        "En Partners, selecciona Crear partner si tienes permiso. Completa nombre, código, solicitudes por minuto y estado.",
+        "Abre la edición de un partner para revisar el límite y su estado antes de guardar cambios.",
+        "Los listados muestran 10 registros por página. Usa Página anterior y Página siguiente para recorrer los resultados; Exportar página descarga solo los registros de la página visible."
+      ],
+      "permission": "partners.read",
+      "route": "/partners"
+    },
+    {
+      "id": "canales",
+      "title": "Configurar canales",
+      "steps": [
+        "En Canales, revisa el partner asociado. Al crear o editar, ingresa código, nombre, ID del partner y límite entre 10 y 100.000 solicitudes por minuto.",
+        "Usa Usuarios o Roles y permisos para administrar accesos. Las tiendas se seleccionan al crear órdenes con inventario disponible para la demostración."
+      ],
+      "permission": "channels.read",
+      "route": "/channels"
+    }
+  ],
+  "faq": [
+    {
+      "question": "¿Dónde vinculo tiendas al canal?",
+      "answer": "El portal permite elegir la tienda al crear una orden. La vista de Canales administra el vínculo con el partner y la cuota."
+    }
+  ],
+  "history": [
+    {
+      "version": "1.1.1",
+      "date": "2026-11-17",
+      "description": "Paginación de 10 registros por página, navegación y alcance de la exportación de página."
+    },
+    {
+      "version": "1.1.0",
+      "date": "2026-11-17",
+      "description": "Lectura, búsqueda e impresión sin iniciar sesión. Se indican los permisos necesarios para ejecutar las operaciones."
+    },
+    {
+      "version": "1.0.0",
+      "date": "2026-11-17",
+      "description": "Publicación de la guía en el centro de ayuda con los flujos disponibles en el portal."
+    }
+  ],
+  "visibility": "public"
+}
