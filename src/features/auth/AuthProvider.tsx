@@ -1,14 +1,19 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { config } from '../../lib/config';
+import { config, usesCognito } from '../../lib/config';
 import { api, apiError, setTokenProvider } from '../../services/api';
-import { accountManagement, beginLogin, clearTokens, completeLogin, endSession, getAccessToken } from '../../services/oidc';
+import { accountManagement, beginLogin, clearTokens, completeLogin, endSession, getAccessToken, isRedirectPending } from '../../services/oidc';
 import type { Session } from '../../types';
+
+/** Explicit authentication lifecycle surfaced to the whole application. */
+export type AuthStatus = 'initializing' | 'authenticated' | 'unauthenticated' | 'error';
 
 interface Auth {
   session: Session | null;
   loading: boolean;
+  initializing: boolean;
+  status: AuthStatus;
   error: string;
   login: (email?: string, password?: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -70,6 +75,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const version = sessionVersion.current;
     try {
       const { data } = await api.get<Session>('/auth/me', { signal });
+      if (usesCognito && (!data?.user || typeof data.user.displayName !== 'string' || !Array.isArray(data.permissions))) {
+        throw new Error('La API no pudo verificar tus permisos. Inténtalo de nuevo.');
+      }
       if (!signal?.aborted && version === sessionVersion.current) setSession(data);
     } catch (failure) {
       if (!signal?.aborted && version === sessionVersion.current && [401, 403].includes(apiError(failure).status ?? 0)) clear();
@@ -94,12 +102,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await refresh(startup.signal);
     };
     void restore().catch(failure => {
-      if (startup.signal.aborted || [401, 403].includes(apiError(failure).status ?? 0)) return;
+      if (startup.signal.aborted) return;
+      const problem = apiError(failure);
+      if ([401, 403].includes(problem.status ?? 0)) {
+        if (usesCognito && problem.status === 403) setError('Tu cuenta no tiene permisos en VortexBird. Contacta al administrador.');
+        return;
+      }
       clearTimeout(timer.current);
       setTokenProvider();
-      setError(apiError(failure).message);
+      setError(problem.message);
     }).finally(() => {
-      if (!startup.signal.aborted) setLoading(false);
+      // While the silent restore redirect is in flight the document is about to
+      // unload: keep the initialization screen instead of painting the login form.
+      if (!startup.signal.aborted && !isRedirectPending()) setLoading(false);
     });
     return () => {
       startup.abort();
@@ -110,8 +125,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [clear, refresh, installDemoAccess, invalidateSession]);
 
   const authenticated = session !== null;
-  useEffect(() => {
-    if (!authenticated) return;
+  useEffect(() => {    if (!authenticated) return;
     const interval = setInterval(() => { void refresh().catch(() => {}); }, 60000);
     return () => clearInterval(interval);
   }, [authenticated, refresh]);
@@ -133,13 +147,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
+    const signingOut = config.demoAuth ? undefined : endSession();
     clear();
-    if (!config.demoAuth) await endSession();
+    await signingOut;
   };
 
+  const status: AuthStatus = session ? 'authenticated' : error ? 'error' : loading ? 'initializing' : 'unauthenticated';
   return (
     <Context.Provider value={{
       session, loading, error, login, logout,
+      initializing: loading,
+      status,
       refresh: () => refresh(),
       register: () => beginLogin('register'),
       resetPassword: () => beginLogin('UPDATE_PASSWORD'),
