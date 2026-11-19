@@ -10,7 +10,7 @@ import { PaymentCheckoutDialog } from '../payments/PaymentCheckoutDialog';
 const { get, post, put, remove } = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn(), put: vi.fn(), remove: vi.fn() }));
 vi.mock('../../services/api', () => ({ api: { get, post, put, delete: remove }, apiError: (error: unknown) => ({ message: String(error) }) }));
 vi.mock('../auth/AuthProvider', () => ({ useAuth: () => ({ can: () => true, refresh: async () => {}, session: { user: { id: 'operator' } } }) }));
-function page(items: unknown[]) { return { data: { items, page: 1, pageSize: 15, totalCount: items.length, totalPages: 1, hasNextPage: false, hasPreviousPage: false } }; }
+function page(items: unknown[]) { return { data: { items, page: 1, pageSize: 10, totalCount: items.length, totalPages: 1, hasNextPage: false, hasPreviousPage: false } }; }
 function mount(children: ReactNode) { return render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })}><BrowserRouter>{children}</BrowserRouter></QueryClientProvider>); }
 beforeEach(() => {
   vi.clearAllMocks();
@@ -36,7 +36,9 @@ describe('Confirmed operational mutations', () => {
     history.replaceState(null, '', '/');
   });
   it('requires confirmation and never offers manual approval for non-simulator payments', async () => {
-    get.mockResolvedValue(page([{ id: 'sim-1', orderId: 'order-1', status: 'pending', provider: 'simulator', amount: 12000 }, { id: 'external-1', orderId: 'order-2', status: 'pending', provider: 'mercadopago', amount: 15000 }]));
+    get.mockImplementation(async (url: string) => url === '/auth/config'
+      ? { data: { simulationEnabled: true } }
+      : page([{ id: 'sim-1', orderId: 'order-1', status: 'pending', provider: 'simulator', amount: 12000 }, { id: 'external-1', orderId: 'order-2', status: 'pending', provider: 'mercadopago', amount: 15000 }]));
     mount(<ResourcePage resource="payments" />);
     const approve = await screen.findByRole('button', { name: 'Aprobar pago de prueba SIM-1' });
     expect(screen.queryByRole('button', { name: /Aprobar pago de prueba EXTERNAL/ })).toBeNull();
@@ -44,6 +46,16 @@ describe('Confirmed operational mutations', () => {
     expect(post).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('button', { name: 'Confirmar resultado de prueba' }));
     await waitFor(() => expect(post).toHaveBeenCalledWith('/payments/sim-1/simulate', { outcome: 'approved' }));
+  });
+
+  it('hides simulation controls for stored demo payments when the API disables simulation', async () => {
+    get.mockImplementation(async (url: string) => url === '/auth/config'
+      ? { data: { simulationEnabled: false } }
+      : page([{ id: 'sim-1', orderId: 'order-1', status: 'pending', provider: 'simulator', amount: 12000 }]));
+    mount(<ResourcePage resource="payments" />);
+    await screen.findByRole('button', { name: 'Ver pago SIM-1' });
+    expect(get).toHaveBeenCalledWith('/auth/config');
+    expect(screen.queryByRole('button', { name: /pago de prueba/ })).toBeNull();
   });
 
   it('keeps a protected role read-only and deletes an unprotected role only after confirmation', async () => {
@@ -63,7 +75,7 @@ describe('Confirmed operational mutations', () => {
     get.mockResolvedValue(page([{ id: 'delivery-1', subscriptionId: 'subscription-1', eventId: 'event-1', status: 'failed', attempts: 3, statusCode: 503, lastError: 'Remote unavailable' }]));
     mount(<ResourcePage resource="webhook-deliveries" />);
     await screen.findByText('Remote unavailable');
-    expect(get).toHaveBeenCalledWith('/webhook-deliveries', { params: { page: 1, pageSize: 15 } });
+    expect(get).toHaveBeenCalledWith('/webhook-deliveries', { params: { page: 1, pageSize: 10 } });
     expect(screen.queryByRole('button', { name: 'Filtros' })).toBeNull();
     expect(screen.queryByRole('textbox')).toBeNull();
   });

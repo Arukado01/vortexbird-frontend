@@ -37,11 +37,11 @@ TanStack Query administra la caché y sus invalidaciones; el servidor pagina, fi
 
 ## Identidad
 
-Cliente OIDC público mediante Authorization Code + PKCE S256. Valida `state` de un solo uso y máximo 10 minutos, issuer exacto y origen de endpoints. En OIDC, access y refresh token permanecen en memoria y la recarga completa requiere renovar el acceso con el proveedor. `sessionStorage` guarda state y code verifier durante el redireccionamiento. El backend valida el JWT y devuelve la identidad y permisos en `/auth/me`. El refresh serializado descarta respuestas posteriores al cierre de sesión.
+Cliente OIDC público mediante Authorization Code + PKCE S256. Valida `state` de un solo uso y máximo 10 minutos, issuer exacto y origen de endpoints. En OIDC, access y refresh token permanecen en memoria. Al recargar una pestaña autenticada, una marca sin secretos en `sessionStorage` inicia una nueva autorización PKCE con `prompt=none`, recupera el acceso mediante la sesión SSO de Keycloak y vuelve al módulo de origen. Si SSO expiró, vuelve al login sin bucles. `sessionStorage` guarda state y code verifier únicamente durante el redireccionamiento; cerrar sesión elimina la marca de recuperación. El backend valida el JWT y devuelve la identidad y permisos en `/auth/me`. El refresh serializado descarta respuestas posteriores al cierre de sesión.
 
 El modo demo guarda su token de diez minutos en `sessionStorage`. Al recargar la misma pestaña, el portal comprueba la sesión en `/auth/me`. El cierre de sesión y la caducidad limpian el token.
 
-El adaptador `keycloak-js` no estaba disponible en el entorno desconectado; se implementó un cliente de alcance reducido en `services/oidc.ts` con pruebas de state, issuer y carrera logout/refresh. Requiere validar el flujo completo con el Keycloak desplegado antes de producción. Registro se delega al formulario de Keycloak; el enlace de cambio de contraseña usa `kc_action=UPDATE_PASSWORD`, y la recuperación sin credenciales se realiza con «Forgot password» en el formulario de Keycloak, sujeto a SMTP configurado. La rotación de claves y revocación efectiva de tokens son responsabilidades de Keycloak/API.
+El adaptador `keycloak-js` no estaba disponible en el entorno desconectado; se implementó un cliente de alcance reducido en `services/oidc.ts` con pruebas de state, issuer, recuperación al recargar, expiración SSO, retorno de ruta y carrera logout/refresh. Requiere validar el flujo completo con el Keycloak desplegado antes de producción. Registro se delega al formulario de Keycloak; el enlace de cambio de contraseña usa `kc_action=UPDATE_PASSWORD`, y la recuperación sin credenciales se realiza con «Forgot password» en el formulario de Keycloak, sujeto a SMTP configurado. La rotación de claves y revocación efectiva de tokens son responsabilidades de Keycloak/API.
 
 ## Checkout de pruebas opcional
 
@@ -56,6 +56,12 @@ Las rutas y el formulario de acceso cargan sus módulos bajo demanda. El layout 
 ## Funciones
 
 Dashboard de métricas persistidas; listados paginados; partners/canales/productos/usuarios; roles dinámicos y matriz de permisos; asignación de roles; creación y detalle de órdenes con clave de idempotencia estable ante reintento; cancelación; stock/precios; pagos simulados; integraciones y fallos controlados; eventos y DLQ; suscripciones webhook con secreto mostrado una vez; auditoría; exportación limitada a la página/serie seleccionada; tema y navegación por teclado.
+
+### Centro de ayuda
+
+Abre `/help` desde el login, el registro, la recuperación o la barra del portal. Los once manuales generales admiten lectura, búsqueda e impresión sin sesión. Cada módulo enlaza a su guía y el regreso conserva la ruta original. Los permisos indicados en los procedimientos corresponden a las operaciones del workspace.
+
+Edita los manuales en `docs/user-manuals/`. Revisa las [pautas de documentación viva](DOCUMENTATION_GUIDELINES.md) y la [arquitectura del centro de ayuda](docs/architecture/help-center.md). Ejecuta `npm run docs:check` antes de integrar el cambio.
 
 No se anuncian SLO medidos, integraciones productivas, ni capacidad de cobro real. El logo oficial no se pudo descargar por restricción DNS; se emplea un icono genérico de conectividad (no un logo recreado) y queda pendiente incorporar el archivo oficial sin alterarlo. Tokens navy/turquesa/naranja basados en el material compartido, pendientes de cotejo exacto con asset oficial.
 
@@ -72,9 +78,33 @@ npm run test:e2e
 
 Las pruebas unitarias cubren callbacks OIDC alterados, issuer erróneo, carrera de refresh/logout, exportación CSV segura, métricas restringidas, paginación y errores con correlación. Las E2E verifican escritorio/móvil, tema, matriz de permisos e idempotencia del formulario; utilizan API interceptada explícitamente y no demuestran que el backend esté desplegado.
 
+### Recorrido de UI aislado
+
+Cuando el entorno no permite abrir un servidor local, Playwright puede cargar el bundle compilado mediante intercepción de recursos. Las respuestas de API siguen siendo sintéticas y este modo no verifica PostgreSQL, Keycloak ni servicios externos.
+
+```powershell
+npm run build
+npm run test:e2e:isolated -- --workers=2
+```
+
+En Windows, si Chromium ya está instalado en la caché del usuario pero Playwright busca en otra ruta, puedes indicar esa caché antes del comando. La variable solo sirve si contiene la versión del navegador requerida por Playwright; no descarga ni instala navegadores:
+
+```powershell
+$browserCache = Join-Path $env:LOCALAPPDATA 'ms-playwright'
+if (Test-Path -LiteralPath $browserCache) { $env:PLAYWRIGHT_BROWSERS_PATH = $browserCache }
+```
+
+Para renovar las ilustraciones de ayuda con datos de prueba, establece `$env:UPDATE_HELP_SCREENSHOTS='1'` antes del recorrido y ejecuta `Remove-Item Env:UPDATE_HELP_SCREENSHOTS` al terminar. El resultado estructurado queda en `test-results/isolated-results.json`; las imágenes se guardan en `public/help-media/` y requieren actualizar las versiones de los manuales afectados.
+
+Verificación del 17 de noviembre de 2026: 22 pruebas unitarias aprobadas; 11 manuales y 18 rutas contextuales validados; recorrido aislado con 20 pruebas aprobadas, 2 omisiones previstas y cero fallos, en 31,3 segundos. Las omisiones corresponden a comprobaciones repetidas de rutas y capturas que se ejecutaron en escritorio. Evidencia consolidada: `../qa/frontend-validation-2026-11-17.json`.
+
 ## Contenedor y CI/CD
 
-Docker multi-stage, nginx sin privilegios (UID 101) en puerto 8080, escritura únicamente en `/tmp`, health endpoint `/health`. Proporcionar `VITE_*` al contenedor; el entrypoint rechaza caracteres que puedan inyectar código en la configuración. `/api` se reenvía al servicio `backend:8080`.
+La suite de autenticación conectada se ejecuta con `npm run test:e2e:live` y se configura siguiendo [la guía de pruebas reales](docs/testing/live-auth.md). Reutiliza el `.env` del lanzador local únicamente si se indica `LIVE_LOCAL_ENV_FILE` y todos los destinos son loopback. En HTTPS staging exige valores `LIVE_*` explícitos. Comprueba acceso anónimo, credenciales inválidas, login, recuperación SSO tras recarga, renovación por vencimiento real y logout. La comprobación adicional de roles se omite de forma explícita si no existe una segunda cuenta QA. No intercepta respuestas ni usa el modo demo.
+
+El smoke OIDC opcional se ejecuta con `node e2e/keycloak-smoke.mjs`. Requiere el realm local en `http://127.0.0.1:18089/realms/vortexbird`, Chromium y un usuario de prueba activo con `partner_id` y `channel_id`. Proporciona sus credenciales con `OIDC_QA_USERNAME` y `OIDC_QA_PASSWORD` en el proceso.
+
+Docker multi-stage, Nginx sin privilegios (UID 101) en puerto 8080, escritura en `/tmp` y comprobación `/health`. En Compose y el EKS alternativo, Nginx reenvía `/api/` a `backend:8080`. En el piloto ECS, `API_PROXY_ENABLED=false` permite que el ALB enrute `/api/*` a su propio servicio y que el frontend arranque de forma independiente.
 
 GitHub Actions verifica código, pruebas y build. Publicación ECR y rollout solo cuando las variables de entorno protegido están configuradas; autenticación AWS mediante OIDC sin claves permanentes. Configurar `AWS_DEPLOY_ROLE_ARN`, `AWS_REGION`, `ECR_REPOSITORY`, `EKS_CLUSTER_NAME`, `FRONTEND_URL` y aprobación del ambiente staging según el plan de infraestructura. Un fallo de rollout ejecuta rollback.
 

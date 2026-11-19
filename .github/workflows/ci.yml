@@ -10,11 +10,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: npm
       - run: npm ci --no-audit --no-fund
+      - run: npm run docs:check
+      - name: Check documentation changes for this pull request
+        if: github.event_name == 'pull_request'
+        env:
+          DOCS_BASE: ${{ github.event.pull_request.base.sha }}
+        run: npm run docs:check -- "$DOCS_BASE"
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
@@ -49,8 +57,8 @@ jobs:
         env:
           REGISTRY: ${{ steps.ecr.outputs.registry }}
           REPOSITORY: ${{ vars.ECR_REPOSITORY }}
-      - name: Deploy approved cluster revision
-        if: vars.EKS_CLUSTER_NAME != ''
+      - name: Deploy the EKS alternative
+        if: vars.DEPLOYMENT_TARGET == 'eks' && vars.EKS_CLUSTER_NAME != ''
         run: |
           aws eks update-kubeconfig --name "$CLUSTER"
           kubectl -n vortexbird set image deployment/frontend frontend="$REGISTRY/$REPOSITORY:$GITHUB_SHA"

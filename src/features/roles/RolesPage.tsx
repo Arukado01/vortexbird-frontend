@@ -24,7 +24,7 @@ export function RolesPage() {
   const [users, setUsers] = useState<Entity | null>(null);
   const [usersPage, setUsersPage] = useState(1);
   const [rolePage, setRolePage] = useState(1);
-  const roles = useQuery({ queryKey: ['roles', rolePage], queryFn: async () => (await api.get<Page>('/roles', { params: { page: rolePage, pageSize: 30 } })).data });
+  const roles = useQuery({ queryKey: ['roles', rolePage], queryFn: async () => (await api.get<Page>('/roles', { params: { page: rolePage, pageSize: 10 } })).data });
   const permissions = useQuery({ queryKey: ['permissions'], queryFn: async () => {
     const all: Entity[] = []; let page = 1; let next = true;
     while (next) { const response = (await api.get<Page>('/permissions', { params: { page, pageSize: 100 } })).data; all.push(...response.items); next = response.hasNextPage; page++; }
@@ -35,7 +35,7 @@ export function RolesPage() {
   const allPermissions = (permissions.data ?? []).map(permission => String(permission.name));
   const grouped = allPermissions.filter(permission => permission.toLowerCase().includes(search.toLowerCase())).reduce<Record<string, string[]>>((result, permission) => { const group = permission.split('.')[0]; (result[group] ??= []).push(permission); return result; }, {});
   const select = (role: Entity) => { setSelected(role); setChecked(Array.isArray(role.permissions) ? role.permissions.map(String) : []); };
-  const roleUsers = useQuery({ queryKey: ['role-users', users?.id, usersPage], enabled: !!users, queryFn: async () => (await api.get<Page>(`/roles/${users?.id}/users`, { params: { page: usersPage, pageSize: 15 } })).data });
+  const roleUsers = useQuery({ queryKey: ['role-users', users?.id, usersPage], enabled: !!users, queryFn: async () => (await api.get<Page>(`/roles/${users?.id}/users`, { params: { page: usersPage, pageSize: 10 } })).data });
   const canEditPermissions = auth.can('roles.assign_permissions') && !selected?.protected;
 
   return <>
